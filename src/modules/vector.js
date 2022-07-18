@@ -12,6 +12,10 @@ class Vector {
         return Vector.NORTH;
     }
 
+    static getRandom(maxVe) {
+        return new Vector(Math.random() * maxVe * 2 - maxVe, Math.random() * maxVe * 2 - maxVe);
+    }
+
     constructor(xve, yve, isConstant = false) {
         this._xve = xve;
         this._yve = yve;

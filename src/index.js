@@ -21,17 +21,14 @@ pauseButton.onclick = ((ev) => {
     }
 });
 
-// canvas top left is (0,0)
-// canvas bottom right is (600,600)
+const randomButton = document.getElementById('random');
+randomButton.onclick = () => {
+    boids.push(Boid.randomBoid());
+};
 
-// ctx.fillStyle = 'green';
-
-// ctx.fillRect(10, 10, 150, 100);
-
-
-
-const boid = new Boid(new Point(100, 100), new Vector(0.5, .5), 'green');
-const boid2 = new Boid(new Point(300, 300), new Vector(0, .2), 'purple');
+const boids = [];
+boids.push(new Boid(new Point(100, 100), new Vector(0.5, .5), 'green'));
+boids.push(new Boid(new Point(300, 300), new Vector(0, .2), 'purple'));
 
 let start;
 let previousTimestamp = 0;
@@ -45,14 +42,13 @@ function step(timestamp) {
     const elapsed = timestamp - start;
     if (previousTimestamp !== timestamp) {
         const count = Math.min(0.1 * elapsed, 200);
-        boid.update();
-        boid2.update();
-
+        boids.forEach(b => b.update());
     }
+    // canvas top left is (0,0)
+    // canvas bottom right is (600,600)
     ctx.clearRect(0, 0, 600, 600);
     ctx.save();
-    boid.draw(ctx)
-    boid2.draw(ctx);
+    boids.forEach(b => b.draw(ctx));
     ctx.restore();
 
     previousTimestamp = timestamp;
