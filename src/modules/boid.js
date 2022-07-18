@@ -1,6 +1,6 @@
 import Point from './point.js';
 import Vector from './vector.js';
-import { convertRgbToHex } from './util.js';
+import { CANVAS_MAX_X, CANVAS_MAX_Y, CANVAS_MIN_X, CANVAS_MIN_Y, convertRgbToHex } from './util.js';
 
 export default class Boid {
     constructor(position, velocity, color) {
@@ -12,7 +12,7 @@ export default class Boid {
 
     static randomBoid() {
         return new Boid(
-            Point.getRandom(600, 600), // Valid random position must be within the canvas 
+            Point.getRandom(CANVAS_MAX_X, CANVAS_MAX_Y), // Valid random position must be within the canvas 
             Vector.getRandom(5), // Valid random velocity must have a maximum magnitude
             convertRgbToHex(Math.random() * 255, Math.random() * 255, Math.random() * 255) // Valid random colour must be an RGB
         );
@@ -21,6 +21,20 @@ export default class Boid {
     update() {
         this.position.x += this.velocity.xve;
         this.position.y += this.velocity.yve;
+
+        // Constrain position to canvas size.
+        if (this.position.x > CANVAS_MAX_X) {
+            this.position.x = CANVAS_MIN_X;
+        }
+        if (this.position.x < CANVAS_MIN_X) {
+            this.position.x = CANVAS_MAX_X;
+        }
+        if (this.position.y > CANVAS_MAX_Y) {
+            this.position.y = CANVAS_MIN_Y;
+        }
+        if (this.position.y < CANVAS_MIN_Y) {
+            this.position.y = CANVAS_MAX_Y;
+        }
     }
 
     draw(context, debug) {

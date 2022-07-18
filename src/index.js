@@ -2,6 +2,7 @@ import './canvas.css';
 import Point from "./modules/point.js";
 import Vector from "./modules/vector.js";
 import Boid from "./modules/boid.js";
+import { CANVAS_MAX_X } from './modules/util';
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -52,7 +53,7 @@ function step(timestamp) {
     }
     // canvas top left is (0,0)
     // canvas bottom right is (600,600)
-    ctx.clearRect(0, 0, 600, 600);
+    ctx.clearRect(0, 0, CANVAS_MAX_X, CANVAS_MAX_Y);
 
     if (debug) {
         ctx.font = '14px Arial';

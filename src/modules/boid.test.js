@@ -13,3 +13,10 @@ test('Color is set correctly', () => {
     const boid = new Boid(new Point(0, 0), new Vector(0, 0), 'red');
     expect(boid.color).toBe('red');
 });
+
+test('Position is constrained to canvas size', () => {
+    const boid = new Boid(new Point(599, 599), new Vector(2, 2), 'orange');
+    boid.update();
+    expect(boid.position.x).toBe(0);
+    expect(boid.position.y).toBe(0);
+});
