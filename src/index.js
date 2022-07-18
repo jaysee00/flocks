@@ -24,14 +24,14 @@ pauseButton.onclick = ((ev) => {
 // canvas top left is (0,0)
 // canvas bottom right is (600,600)
 
-ctx.fillStyle = 'green';
+// ctx.fillStyle = 'green';
 
 // ctx.fillRect(10, 10, 150, 100);
 
 
 
-const boid = new Boid(new Point(100, 100), new Vector(0.5, .5));
-const boid2 = new Boid(new Point(300, 300), new Vector(0, .2));
+const boid = new Boid(new Point(100, 100), new Vector(0.5, .5), 'green');
+const boid2 = new Boid(new Point(300, 300), new Vector(0, .2), 'purple');
 
 let start;
 let previousTimestamp = 0;

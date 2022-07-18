@@ -2,10 +2,11 @@ import Point from './point.js';
 import Vector from './vector.js';
 
 export default class Boid {
-    constructor(position, velocity) {
+    constructor(position, velocity, color) {
         this.position = position;
         this.velocity = velocity;
         this.sideLength = 50;
+        this.color = color
     }
 
     update() {
@@ -26,7 +27,7 @@ export default class Boid {
         const rotationAngle = Vector.getDefaultOrientation().angleBetween(this.velocity);
 
         context.rotate(rotationAngle);
-        context.fillStyle = 'green';
+        context.fillStyle = this.color;
         context.beginPath();
         context.moveTo(points[0].x, points[0].y);
         context.lineTo(points[1].x, points[1].y);
@@ -35,9 +36,9 @@ export default class Boid {
         context.fill();
 
         // draw the centroid
-        context.fillStyle = 'red';
+        context.fillStyle = 'black';
         context.beginPath();
-        context.arc(0, 0, 10, 0, 2 * Math.PI);
+        context.arc(0, 0, 5, 0, 2 * Math.PI);
         context.fill();
 
         context.beginPath();

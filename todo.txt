@@ -1,4 +1,3 @@
-* Add boid colour parameter
 * Add random boid generator
 * Option to draw velocity vector on/off
 * Move boids to object graph.

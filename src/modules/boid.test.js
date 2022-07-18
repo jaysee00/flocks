@@ -3,8 +3,13 @@ import Point from './point.js';
 import Vector from './vector.js';
 
 test('Update loop sets position correctly', () => {
-    const boid = new Boid(new Point(0, 0), new Vector(2, 1));
+    const boid = new Boid(new Point(0, 0), new Vector(2, 1), 'green');
     boid.update();
     expect(boid.position.x).toBe(2);
     expect(boid.position.y).toBe(1);
+});
+
+test('Color is set correctly', () => {
+    const boid = new Boid(new Point(0, 0), new Vector(0, 0), 'red');
+    expect(boid.color).toBe('red');
 });
