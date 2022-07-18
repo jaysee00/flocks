@@ -1,4 +1,3 @@
-* Add random boid generator
 * Option to draw velocity vector on/off
 * Move boids to object graph.
 * Boids teleport to opposite end when moving off canvas.

@@ -1,5 +1,6 @@
 import Point from './point.js';
 import Vector from './vector.js';
+import { convertRgbToHex } from './util.js';
 
 export default class Boid {
     constructor(position, velocity, color) {
@@ -8,6 +9,15 @@ export default class Boid {
         this.sideLength = 50;
         this.color = color
     }
+
+    static randomBoid() {
+        return new Boid(
+            Point.getRandom(600, 600), // Valid random position must be within the canvas 
+            Vector.getRandom(5), // Valid random velocity must have a maximum magnitude
+            convertRgbToHex(Math.random() * 255, Math.random() * 255, Math.random() * 255) // Valid random colour must be an RGB
+        );
+    }
+
 
     update() {
         this.position.x += this.velocity.xve;
