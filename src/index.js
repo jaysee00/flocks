@@ -7,6 +7,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 let paused = false;
+let debug = false;
 let raf;
 
 const pauseButton = document.getElementById('pause');
@@ -25,6 +26,11 @@ const randomButton = document.getElementById('random');
 randomButton.onclick = () => {
     boids.push(Boid.randomBoid());
 };
+
+const debugCheckbox = document.getElementById('debug');
+debugCheckbox.onchange = () => {
+    debug = debugCheckbox.checked;
+}
 
 const boids = [];
 boids.push(new Boid(new Point(100, 100), new Vector(0.5, .5), 'green'));
@@ -47,8 +53,14 @@ function step(timestamp) {
     // canvas top left is (0,0)
     // canvas bottom right is (600,600)
     ctx.clearRect(0, 0, 600, 600);
+
+    if (debug) {
+        ctx.font = '14px Arial';
+        ctx.fillText("Debug", 10, 20);
+    }
+
     ctx.save();
-    boids.forEach(b => b.draw(ctx));
+    boids.forEach(b => b.draw(ctx, debug));
     ctx.restore();
 
     previousTimestamp = timestamp;

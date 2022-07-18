@@ -18,16 +18,20 @@ export default class Boid {
         );
     }
 
-
     update() {
         this.position.x += this.velocity.xve;
         this.position.y += this.velocity.yve;
     }
 
-    draw(context) {
+    draw(context, debug) {
         // Rotate the canvas so the boid has the correct heading
         context.save();
         context.translate(this.position.x, this.position.y);
+
+        if (debug) {
+            context.font = "12px Serif";
+            context.fillText(`(${Math.round(this.position.x, 2)}, ${Math.round(this.position.y, 2)})`, 10, 10);
+        }
 
         const points = [
             new Point(0 - this.sideLength / 2, 0 + this.sideLength / 2),
@@ -45,17 +49,19 @@ export default class Boid {
         context.closePath();;
         context.fill();
 
-        // draw the centroid
-        context.fillStyle = 'black';
-        context.beginPath();
-        context.arc(0, 0, 5, 0, 2 * Math.PI);
-        context.fill();
+        if (debug) {
+            // draw the co-ordinates of the boid
+            context.fillStyle = 'black';
+            context.beginPath();
+            context.arc(0, 0, 5, 0, 2 * Math.PI);
+            context.fill();
 
-        context.beginPath();
-        context.moveTo(0, 0);
-        context.lineTo(0, this.sideLength * -2);
-        context.stroke();
-
+            // draw the velocity vector
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(0, this.sideLength * -2);
+            context.stroke();
+        }
         context.restore();
     }
 }
