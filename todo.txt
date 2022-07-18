@@ -1,0 +1,17 @@
+* Add boid colour parameter
+* Add random boid generator
+* Option to draw velocity vector on/off
+* Move boids to object graph.
+* Boids teleport to opposite end when moving off canvas.
+* Apply flocking behaviours to boid velocity
+* Define flocks of particular colours
+* Allow user input to control:
+    * Number of flocks
+    * Boids per flock
+    * Flocking behaviour strengths
+    * Simulation speed
+* Add nice styling to page layout.
+* Add a predator behaviour
+* Add a hiding behaviour? 
+* Set production webpack behaviour (https://webpack.js.org/guides/production/)
+* Minimise CSS w/ webpack (https://webpack.js.org/plugins/mini-css-extract-plugin/#minimizing-for-production)
