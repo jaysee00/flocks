@@ -1,5 +1,3 @@
-* Boids teleport to opposite end when moving off canvas.
-* Apply flocking behaviours to boid velocity
 * Define flocks of particular colours
 * Allow user input to control:
     * Number of flocks

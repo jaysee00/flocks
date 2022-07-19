@@ -2,7 +2,8 @@ import './canvas.css';
 import Point from "./modules/point.js";
 import Vector from "./modules/vector.js";
 import Boid from "./modules/boid.js";
-import { CANVAS_MAX_X } from './modules/util';
+import Graph from './modules/graph.js';
+import { CANVAS_MAX_X, CANVAS_MAX_Y } from './modules/util';
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -12,7 +13,7 @@ let debug = false;
 let raf;
 
 const pauseButton = document.getElementById('pause');
-pauseButton.onclick = ((ev) => {
+pauseButton.onclick = (() => {
     paused = !paused;
     if (paused) {
         pauseButton.innerHTML = 'Resume';
@@ -25,7 +26,7 @@ pauseButton.onclick = ((ev) => {
 
 const randomButton = document.getElementById('random');
 randomButton.onclick = () => {
-    boids.push(Boid.randomBoid());
+    graph.add(Boid.randomBoid());
 };
 
 const debugCheckbox = document.getElementById('debug');
@@ -33,9 +34,10 @@ debugCheckbox.onchange = () => {
     debug = debugCheckbox.checked;
 }
 
-const boids = [];
-boids.push(new Boid(new Point(100, 100), new Vector(0.5, .5), 'green'));
-boids.push(new Boid(new Point(300, 300), new Vector(0, .2), 'purple'));
+const graph = new Graph();
+graph.add(Boid.randomBoid());
+graph.add(Boid.randomBoid());
+graph.add(Boid.randomBoid());
 
 let start;
 let previousTimestamp = 0;
@@ -46,11 +48,14 @@ function step(timestamp) {
         start = timestamp;
     }
 
-    const elapsed = timestamp - start;
-    if (previousTimestamp !== timestamp) {
-        const count = Math.min(0.1 * elapsed, 200);
-        boids.forEach(b => b.update());
+
+
+    const delta = timestamp - previousTimestamp;
+    console.log(delta);
+    if (delta > 0) {
+        graph.update(delta);
     }
+
     // canvas top left is (0,0)
     // canvas bottom right is (600,600)
     ctx.clearRect(0, 0, CANVAS_MAX_X, CANVAS_MAX_Y);
@@ -61,7 +66,7 @@ function step(timestamp) {
     }
 
     ctx.save();
-    boids.forEach(b => b.draw(ctx, debug));
+    graph.draw(ctx, debug);
     ctx.restore();
 
     previousTimestamp = timestamp;

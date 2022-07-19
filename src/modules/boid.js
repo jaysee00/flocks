@@ -1,26 +1,85 @@
 import Point from './point.js';
 import Vector from './vector.js';
+import Graph from './graph.js';
+import Decimal from 'decimal.js';
+import { v4 as uuidv4 } from 'uuid';
+
 import { CANVAS_MAX_X, CANVAS_MAX_Y, CANVAS_MIN_X, CANVAS_MIN_Y, convertRgbToHex } from './util.js';
+
+const AVOIDANCE_RADIUS = 50;
+const SPEED_LIMIT = 2;
 
 export default class Boid {
     constructor(position, velocity, color) {
         this.position = position;
         this.velocity = velocity;
-        this.sideLength = 50;
+        this.sideLength = 25;
         this.color = color
+        this.uuid = uuidv4();
+
+        this.cohesionVector;
+        this.avoidanceVector;
+        this.alignmentVector;
     }
 
     static randomBoid() {
         return new Boid(
             Point.getRandom(CANVAS_MAX_X, CANVAS_MAX_Y), // Valid random position must be within the canvas 
-            Vector.getRandom(5), // Valid random velocity must have a maximum magnitude
+            Vector.getRandom(2), // Valid random velocity must have a maximum magnitude
             convertRgbToHex(Math.random() * 255, Math.random() * 255, Math.random() * 255) // Valid random colour must be an RGB
         );
     }
 
-    update() {
-        this.position.x += this.velocity.xve;
-        this.position.y += this.velocity.yve;
+    update(graph, delta) {
+        console.log(`Updating Boid ${this.uuid} (${this.color})`);
+
+        // Calculate:
+        // 1 - Cohesion vector (move to center of boids position)
+        // TODO: Consider adding a max radius.
+        const otherBoids = graph.getAll(o => o instanceof Boid && o !== this)
+        if (otherBoids.length > 0) {
+
+
+
+            // const otherBoids = graph.getAll(o => o instanceof Boid).map(b => b.position);
+            const aggregatePoint = otherBoids.map(b => b.position).reduce((prev, current) => {
+                return new Point(prev.x + current.x, prev.y + current.y);
+            });
+            const cohesionPoint = new Point(new Decimal(aggregatePoint.x / otherBoids.length).toNumber(), new Decimal(aggregatePoint.y / otherBoids.length).toNumber());
+            this.cohesionVector = this.position.vectorTo(cohesionPoint);
+
+            // 2 - Alignment vector (align to average velocity of other boids)
+            this.alignmentVector = otherBoids.reduce((prev, current) => {
+                return new Vector(prev.xve + current.velocity.xve, prev.yve + current.velocity.yve);
+            }, new Vector(0, 0)).divideByScalar(otherBoids.length).divideByScalar(8);
+
+            // 3 - Avoidance vector (don't get too close to other boids)
+            this.avoidanceVector = otherBoids.reduce((prev, current) => {
+                if (Math.abs(current.position.x - this.position.x) < AVOIDANCE_RADIUS && Math.abs(current.position.y - this.position.y) < AVOIDANCE_RADIUS) {
+                    // This boid is too close. 
+                    const acc = prev.addVe(this.position.x - current.position.x, this.position.y - current.position.y).amplify(100);
+                    return acc;
+                }
+                return prev;
+            }, new Vector(0, 0));
+
+
+            const targetVelocity = this.avoidanceVector.addVector(this.alignmentVector).addVector(this.cohesionVector);
+
+            // New velocity is 50% current velocity + 50% target velocity
+            this.velocity = targetVelocity;
+
+            // this.velocity =
+            if (Math.abs(this.velocity.getMagnitude()) > SPEED_LIMIT) {
+                this.velocity = this.velocity.constrain(SPEED_LIMIT);
+                console.log(`Velocity constrained to ${JSON.stringify(this.velocity)}`);
+            }
+        }
+
+        // Delta is the time between frames in milliseconds. Assume a Delta of 10ms is equal to a 1x update. 
+
+        this.position.x += this.velocity.xve * (delta / 10)
+        this.position.y += this.velocity.yve * (delta / 10);
 
         // Constrain position to canvas size.
         if (this.position.x > CANVAS_MAX_X) {
@@ -38,13 +97,40 @@ export default class Boid {
     }
 
     draw(context, debug) {
+        console.log(`Drawing boid ${this.uuid} (${this.color}) | Position: ${JSON.stringify(this.position)} | Velocity: ${JSON.stringify(this.velocity)}`);
         // Rotate the canvas so the boid has the correct heading
         context.save();
         context.translate(this.position.x, this.position.y);
 
         if (debug) {
+            context.fillStyle = 'black';
             context.font = "12px Serif";
             context.fillText(`(${Math.round(this.position.x, 2)}, ${Math.round(this.position.y, 2)})`, 10, 10);
+
+            context.strokeStyle = 'blue';
+            const normalizedCV = this.cohesionVector.getUnitVector();
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(normalizedCV.xve * this.sideLength, normalizedCV.yve * this.sideLength);
+            context.stroke();
+
+            if (this.alignmentVector.getMagnitude() > 0) {
+                context.strokeStyle = 'green';
+                const normalizedAlignmentVec = this.alignmentVector.getUnitVector();
+                context.beginPath();
+                context.moveTo(0, 0);
+                context.lineTo(normalizedAlignmentVec.xve * this.sideLength, normalizedAlignmentVec.yve * this.sideLength);
+                context.stroke();
+            }
+
+            if (this.avoidanceVector.getMagnitude() > 0) {
+                context.stokeStyle = 'red';
+                const normalizedAV = this.avoidanceVector.getUnitVector();
+                context.beginPath();
+                context.moveTo(0, 0);
+                context.lineTo(normalizedAV.xve * this.sideLength, normalizedAV.yve * this.sideLength);
+                context.stroke();
+            }
         }
 
         const points = [
@@ -52,7 +138,10 @@ export default class Boid {
             new Point(0 + this.sideLength / 2, 0 + this.sideLength / 2),
             new Point(0, 0 - this.sideLength / 2)
         ];
-        const rotationAngle = Vector.getDefaultOrientation().angleBetween(this.velocity);
+        let rotationAngle = Vector.getDefaultOrientation().angleBetween(this.velocity);
+        if (this.velocity.xve < 0) {
+            rotationAngle = rotationAngle * -1;
+        }
 
         context.rotate(rotationAngle);
         context.fillStyle = this.color;
@@ -60,7 +149,7 @@ export default class Boid {
         context.moveTo(points[0].x, points[0].y);
         context.lineTo(points[1].x, points[1].y);
         context.lineTo(points[2].x, points[2].y);
-        context.closePath();;
+        context.closePath();
         context.fill();
 
         if (debug) {
@@ -71,6 +160,7 @@ export default class Boid {
             context.fill();
 
             // draw the velocity vector
+            context.strokeStyle = 'black';
             context.beginPath();
             context.moveTo(0, 0);
             context.lineTo(0, this.sideLength * -2);

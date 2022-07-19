@@ -17,6 +17,14 @@ class Vector {
     }
 
     constructor(xve, yve, isConstant = false) {
+        if (xve == undefined || isNaN(xve) || xve === null) {
+            throw new Error("xve must be a number");
+        }
+
+        if (yve == undefined || isNaN(yve) || yve === null) {
+            throw new Error("xve must be a number");
+        }
+
         this._xve = xve;
         this._yve = yve;
         this.isConstant = isConstant;
@@ -29,6 +37,9 @@ class Vector {
         if (this.isConstant) {
             throw new Error('Cannot set xve on a constant vector');
         }
+        if (xve === undefined || isNaN(xve) || xve === null) {
+            throw new Error("xve must be a number");
+        }
         this._xve = xve;
     }
 
@@ -39,7 +50,34 @@ class Vector {
         if (this.isConstant) {
             throw new Error('Cannot set yve on a constant vector');
         }
+        if (yve === undefined || isNaN(yve) || yve === null) {
+            throw new Error("xve must be a number");
+        }
         this._yve = yve;
+    }
+
+    addVe(xve, yve) {
+        return new Vector(this.xve + xve, this.yve + yve);
+    }
+
+    amplify(scalar) {
+        return new Vector(this.xve * scalar, this.yve * scalar);
+    }
+
+    constrain(scalar) {
+
+        let xcomponent = Decimal.div(this.xve, Math.abs(this.getMagnitude())).toNumber() * scalar;
+        let ycomponent = Decimal.div(this.yve, Math.abs(this.getMagnitude())).toNumber() * scalar;
+        console.log(`Constrained to ${xcomponent} ${ycomponent}`);
+        return new Vector(xcomponent, ycomponent);
+    }
+
+    addVector(vector) {
+        return new Vector(this.xve + vector.xve, this.yve + vector.yve);
+    }
+
+    divideByScalar(scalar) {
+        return new Vector(Decimal.div(this.xve, scalar).toNumber(), Decimal.div(this.yve, scalar).toNumber());
     }
 
     getMagnitude() {
