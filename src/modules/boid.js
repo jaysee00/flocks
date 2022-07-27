@@ -2,16 +2,16 @@ import Point from './point.js';
 import Vector from './vector.js';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
-import { CANVAS_MAX_X, CANVAS_MAX_Y, CANVAS_MIN_X, CANVAS_MIN_Y, convertRgbToHex } from './util.js';
+import { CANVAS_MAX_X, CANVAS_MAX_Y, CANVAS_MIN_X, CANVAS_MIN_Y, randomColour, convertRgbToHex } from './util.js';
 
-const AVOIDANCE_RADIUS = 50;
+const AVOIDANCE_RADIUS = 40;
 const SPEED_LIMIT = 2;
 
 export default class Boid {
     constructor(position, velocity, color) {
         this.position = position;
         this.velocity = velocity;
-        this.sideLength = 25;
+        this.sideLength = 15;
         this.color = color
         this.uuid = uuidv4();
 
@@ -21,22 +21,24 @@ export default class Boid {
         this.targetVelocity;
     }
 
-    static randomBoid() {
+    static randomBoid(colour) {
         return new Boid(
             Point.getRandom(CANVAS_MAX_X, CANVAS_MAX_Y), // Valid random position must be within the canvas 
             Vector.getRandom(2), // Valid random velocity must have a maximum magnitude
-            convertRgbToHex(Math.random() * 255, Math.random() * 255, Math.random() * 255) // Valid random colour must be an RGB
+            colour ? colour : randomColour()
         );
     }
 
-    update(graph, delta) {
+    update(graph, delta, otherBoids) {
         console.log(`Updating Boid ${this.uuid} (${this.color})`);
+
+        if (!otherBoids) {
+            otherBoids = graph.getAll(o => o instanceof Boid && o !== this);
+        }
 
         // Calculate:
         // 1 - Cohesion vector (move to center of boids position)
-        const otherBoids = graph.getAll(o => o instanceof Boid && o !== this)
         if (otherBoids.length > 0) {
-            // const otherBoids = graph.getAll(o => o instanceof Boid).map(b => b.position);
             const aggregatePoint = otherBoids.map(b => b.position).reduce((prev, current) => {
                 return new Point(prev.x + current.x, prev.y + current.y);
             });
@@ -108,7 +110,7 @@ export default class Boid {
     }
 
     draw(context, debug) {
-        console.log(`Drawing boid ${this.uuid} (${this.color}) | Position: ${JSON.stringify(this.position)} | Velocity: ${JSON.stringify(this.velocity)}`);
+        console.log(`DEBUG ${debug} Drawing boid ${this.uuid} (${this.color}) | Position: ${JSON.stringify(this.position)} | Velocity: ${JSON.stringify(this.velocity)}`);
         // Rotate the canvas so the boid has the correct heading
         context.save();
         context.translate(this.position.x, this.position.y);

@@ -1,6 +1,7 @@
 import './canvas.css';
 import Point from "./modules/point.js";
 import Vector from "./modules/vector.js";
+import Flock from './modules/flock.js';
 import Boid from "./modules/boid.js";
 import Graph from './modules/graph.js';
 import { CANVAS_MAX_X, CANVAS_MAX_Y } from './modules/util';
@@ -37,15 +38,21 @@ randomButton.onclick = () => {
     graph.add(Boid.randomBoid());
 };
 
+const randomFlockButton = document.getElementById('randomFlock');
+randomFlockButton.onclick = () => {
+    graph.add(Flock.randomFlock());
+}
+
 const debugCheckbox = document.getElementById('debug');
 debugCheckbox.onchange = () => {
     debug = debugCheckbox.checked;
 }
 
 const graph = new Graph();
-graph.add(Boid.randomBoid());
-graph.add(Boid.randomBoid());
-graph.add(Boid.randomBoid());
+// graph.add(Boid.randomBoid());
+// graph.add(Boid.randomBoid());
+// graph.add(Boid.randomBoid());
+graph.add(Flock.randomFlock());
 
 let start;
 let previousTimestamp = 0;
@@ -61,6 +68,7 @@ function step(timestamp, repeat = true) {
     console.log(delta);
     if (delta > 0) {
         previousTimestamp = timestamp;
+        console.log("Updating graph");
         graph.update(delta);
     }
 
