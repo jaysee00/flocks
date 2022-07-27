@@ -17,11 +17,19 @@ pauseButton.onclick = (() => {
     paused = !paused;
     if (paused) {
         pauseButton.innerHTML = 'Resume';
+        stepButton.disabled = false;
         window.cancelAnimationFrame(raf);
     } else {
         pauseButton.innerHTML = 'Pause';
+        stepButton.disabled = true;
         raf = window.requestAnimationFrame(step);
+
     }
+});
+
+const stepButton = document.getElementById('step');
+stepButton.onclick = (() => {
+    step(previousTimestamp + 16, false);
 });
 
 const randomButton = document.getElementById('random');
@@ -41,36 +49,32 @@ graph.add(Boid.randomBoid());
 
 let start;
 let previousTimestamp = 0;
-let done = false;
 
-function step(timestamp) {
+function step(timestamp, repeat = true) {
+    console.log(`Step`);
     if (start === undefined) {
         start = timestamp;
     }
 
-
-
+    // Update
     const delta = timestamp - previousTimestamp;
     console.log(delta);
     if (delta > 0) {
+        previousTimestamp = timestamp;
         graph.update(delta);
     }
 
-    // canvas top left is (0,0)
-    // canvas bottom right is (600,600)
+    // Render
     ctx.clearRect(0, 0, CANVAS_MAX_X, CANVAS_MAX_Y);
-
     if (debug) {
         ctx.font = '14px Arial';
         ctx.fillText("Debug", 10, 20);
     }
-
     ctx.save();
     graph.draw(ctx, debug);
     ctx.restore();
 
-    previousTimestamp = timestamp;
-    if (!done) {
+    if (repeat) {
         raf = window.requestAnimationFrame(step);
     }
 }

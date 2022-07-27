@@ -56,6 +56,12 @@ class Vector {
         this._yve = yve;
     }
 
+    rotate(angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return new Vector(this.xve * cos - this.yve * sin, this.xve * sin + this.yve * cos);
+    }
+
     addVe(xve, yve) {
         return new Vector(this.xve + xve, this.yve + yve);
     }
@@ -93,6 +99,12 @@ class Vector {
         const magSq = ({ xve, yve }) => xve ** 2 + yve ** 2;
 
         const angle = Math.acos(dot(this, other) / Math.sqrt(magSq(this) * magSq(other)));
+
+        // Determine CW or CCW
+        const cz = this.xve * other.yve - this.yve * other.xve;
+        if (cz < 0) {
+            return angle * -1;
+        }
         return angle;
 
     }

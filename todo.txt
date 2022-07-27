@@ -1,4 +1,5 @@
 * Define flocks of particular colours
+    * Flock goal vector
 * Allow user input to control:
     * Number of flocks
     * Boids per flock

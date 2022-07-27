@@ -1,9 +1,7 @@
 import Point from './point.js';
 import Vector from './vector.js';
-import Graph from './graph.js';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
-
 import { CANVAS_MAX_X, CANVAS_MAX_Y, CANVAS_MIN_X, CANVAS_MIN_Y, convertRgbToHex } from './util.js';
 
 const AVOIDANCE_RADIUS = 50;
@@ -20,6 +18,7 @@ export default class Boid {
         this.cohesionVector;
         this.avoidanceVector;
         this.alignmentVector;
+        this.targetVelocity;
     }
 
     static randomBoid() {
@@ -35,12 +34,8 @@ export default class Boid {
 
         // Calculate:
         // 1 - Cohesion vector (move to center of boids position)
-        // TODO: Consider adding a max radius.
         const otherBoids = graph.getAll(o => o instanceof Boid && o !== this)
         if (otherBoids.length > 0) {
-
-
-
             // const otherBoids = graph.getAll(o => o instanceof Boid).map(b => b.position);
             const aggregatePoint = otherBoids.map(b => b.position).reduce((prev, current) => {
                 return new Point(prev.x + current.x, prev.y + current.y);
@@ -64,12 +59,28 @@ export default class Boid {
             }, new Vector(0, 0));
 
 
-            const targetVelocity = this.avoidanceVector.addVector(this.alignmentVector).addVector(this.cohesionVector);
+            this.targetVelocity = this.avoidanceVector.addVector(this.alignmentVector).addVector(this.cohesionVector);
 
-            // New velocity is 50% current velocity + 50% target velocity
-            this.velocity = targetVelocity;
 
-            // this.velocity =
+            //     let rotationAngle = Vector.getDefaultOrientation().angleBetween(this.velocity);
+            // if (this.velocity.xve < 0) {
+            //     rotationAngle = rotationAngle * -1;
+            // }
+
+
+
+            // Max rotation per frame is 10 degrees
+            const targetRotation = this.velocity.angleBetween(this.targetVelocity);
+            let targetRotationInDegrees = targetRotation * (180 / Math.PI);
+            let actualRotation = 0;
+            if (targetRotationInDegrees > Math.abs(10)) {
+                console.log(`Target rotation was ${targetRotationInDegrees}. Constraining to 10 degrees.`);
+                actualRotation = 0.0872665; // 5 degrees in radians
+            } else {
+                actualRotation = targetRotation;
+            }
+            this.velocity = this.velocity.rotate(actualRotation);
+
             if (Math.abs(this.velocity.getMagnitude()) > SPEED_LIMIT) {
                 this.velocity = this.velocity.constrain(SPEED_LIMIT);
                 console.log(`Velocity constrained to ${JSON.stringify(this.velocity)}`);
@@ -131,6 +142,14 @@ export default class Boid {
                 context.lineTo(normalizedAV.xve * this.sideLength, normalizedAV.yve * this.sideLength);
                 context.stroke();
             }
+
+            context.strokeStyle = 'red';
+            context.lineWidth = 3;
+            context.beginPath();
+            context.moveTo(0, 0);
+            const normalizedTv = this.targetVelocity.getUnitVector();
+            context.lineTo(normalizedTv.xve * this.sideLength, normalizedTv.yve * this.sideLength);
+            context.stroke();
         }
 
         const points = [
@@ -139,9 +158,9 @@ export default class Boid {
             new Point(0, 0 - this.sideLength / 2)
         ];
         let rotationAngle = Vector.getDefaultOrientation().angleBetween(this.velocity);
-        if (this.velocity.xve < 0) {
-            rotationAngle = rotationAngle * -1;
-        }
+        // if (this.velocity.xve < 0) {
+        //     rotationAngle = rotationAngle * -1;
+        // }
 
         context.rotate(rotationAngle);
         context.fillStyle = this.color;
