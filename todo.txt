@@ -1,5 +1,14 @@
-* Define flocks of particular colours
-    * Flock goal vector
+* BUG: When un-pausing, the first update shouldn't time jump ahead to make up for the elapsed real time.
+* BUG: Investigate why boids sometimes do a full 180deg when rotation should be constrained
+* TIDY: Tidy up rendering of debug vectors - make the lines a bit thinner and also render the target vector vs. actual vector. 
+* TIDY: Render boid ID in debug log (May need to move to integers instead of UUIDs so its readable).
+    ** Therefore may need an atomic ID generator (easy because we're single-threaded.)
+* TIDY: Tidy up console logging so it's easy to audit each update frame 
+** Indentation
+** Each update frame & render frame has a border
+** Try some identifying colours (eg. https://www.aaron-powell.com/posts/2019-03-14-pretty-javascript-console/)
+*** Or something like this: https://www.npmjs.com/package/pretty-browser-log
+* Define a target location for each flock to simulate more natural looking movements.
 * Allow user input to control:
     * Number of flocks
     * Boids per flock
